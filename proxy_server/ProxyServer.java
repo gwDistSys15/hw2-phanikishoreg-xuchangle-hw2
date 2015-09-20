@@ -90,7 +90,12 @@ public class ProxyServer {
 
 			//for each line in file
 			while ((sCurrentLine = br.readLine()) != null) {
-				System.out.println("line no: " + noOfLines);
+				//System.out.println("line no: " + (++ noOfLines));
+				if(sCurrentLine.isEmpty() || sCurrentLine.charAt(0) == '#') {
+					//some servers just die without notifying.. i cannot keep editing table each time..
+					//for a empty line or a line with "#".. to support comments.
+					continue;
+				}
 				//start of conversion servers found
 				if(sCurrentLine.equals("=CONVERSION_SERVER_LIST") && (startServList != true)) {
 					startServList = true;
