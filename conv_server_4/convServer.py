@@ -99,6 +99,7 @@ except socket.error as errmsg: #if failed..
         s.close() #cleanup..
         sys.exit(-1) #terminate..
 
+print "started server on port ", str(portnum)
 while True:
 	try:
 		# accept connection and print out info of client

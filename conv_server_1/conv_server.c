@@ -22,6 +22,7 @@
 #include <getopt.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
 
 static char* port;
@@ -160,11 +161,10 @@ process(int sock)
 
 		return; //return from this client..
 	}
-	printf("%.2f %s = %.2f %s\n", input_val, from_conv, conv_val, to_conv);
+	printf("%f %s = %f %s\n", input_val, from_conv, conv_val, to_conv);
 
 	bzero(buf, BUFSIZE);
-	//reporting precision upto 2 decimal points.
-	sprintf(buf, "%.2f\n", conv_val);
+	sprintf(buf, "%f\n", conv_val);
 
 	/* Write the converted value to the client */
 	n = write(sock, buf, strlen(buf));
