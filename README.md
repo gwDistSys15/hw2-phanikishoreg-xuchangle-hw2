@@ -13,9 +13,14 @@
 
 	4. Proxy Server (Configurable)
 
-#### Feet <-> Inches
+#### Feet <-> Inches (conv_server_1)
 
-This is a C program. To run, use the following syntax:
+This is a C program. 
+To Compile, 
+```
+$gcc -o conv_server conv_server.c
+```
+To run, use the following syntax:
 ```
 $./conv_server <portno>
 ```
@@ -25,7 +30,7 @@ ex:
 $./conv_server 9999
 ```
 
-To convert from Feet to Inches, use the following input format: (same as described by Professor)
+To convert between Feet and Inches, use the following input format: (same as described by Professor)
 ```
 ft in <value><\n>
 or
@@ -40,9 +45,14 @@ Response: Response from the server will be a float value.
 1200.00
 ```
 
-#### Inches <-> Centimetres
+#### Inches <-> Centimetres (conv_server_2)
 
-This is a Java program. To run use the following syntax:
+This is a Java program. 
+To compile,
+```
+$javac ConvServer.java
+```
+To run use the following syntax:
 ```
 $java ConvServer <portno>
 ```
@@ -51,7 +61,7 @@ where "ConvServer" is the Server class and <portno> is the port number for this 
 Ex:
 $java ConvServer 9998
 ```
-To convert from Inches to Centimetres, use the following input format: (same as described by Professor)
+To convert between Inches and Centimetres, use the following input format: (same as described by Professor)
 ```
 cm in <value><\n>
 or
@@ -65,8 +75,9 @@ Response: Response from the server will be a float value.
 (for above example)
 3048.00
 ```
+#### More Servers!!! (Just to make multi-level going.. :-( ) 
 
-#### Meters <-> Centimetres
+**Meters <-> Centimetres** (conv_server_3)
 
 This is a Python script. To run, use the following syntax:
 ```
@@ -77,7 +88,7 @@ where "convServer.py" is the python script name and <portno> is the port number 
 Ex:
 $python convServer.py 9997
 ```
-To convert from Meters to Centimetres, use the following input format: (same as described by Professor)
+To convert between Meters and Centimetres, use the following input format: (same as described by Professor)
 ```
 cm m <value><\n>
 or
@@ -91,6 +102,32 @@ Response: Response from the server will be a float value.
 (for above example)
 12.0
 ```
+**Bananas <-> Inches** (conv_server_4)
+
+This is a Python script. To run, use the following syntax:
+```
+$python convServer.py <portno>
+```
+where "convServer.py" is the python script name and <portno> is the port number for this server to listen to.
+```
+Ex:
+$python convServer.py 9996
+```
+To convert between Bananas and Inches, use the following input format: (same as described by Professor)
+```
+b in <value><\n>
+or
+in b <value><\n>
+
+Ex:
+b in 100
+```
+Response: Response from the server will be a float value. 
+```
+(for above example)
+500.0
+```
+*(using conversion value: 1 Banana = 5.0 Inches)*
 
 ## Proxy Server
 
@@ -200,6 +237,7 @@ Similarly, "=CONVERSION_TABLE" followed by "=END_TABLE". After start tag line an
 <conversion-type>:<sub-conv-type1>,<sub-conv-type2>,<sub-conv-type3>,..,<sub-conv-typen>
 ```
 **Very Important:** (In writing Conversion server list or Conversion table - for Static or Dynamic)
+* If a line starts with '#', it is regarded as comment and ignored.
 * Conversion table: conversion-type and sub-conv-type combination should be in both directions if you need support for x to y and y to x conversions like in the above example.
 * Conversion server list: conversion-type, if you've a server that supports for example, in->ft and ft->in, please add two entries respectively.
 * Please make sure there are no extra space characters either at the beginning or ending or anywhere else in the file. Proxy server is not mature enough to trim the spaces or ignore junk in the file. It may terminate abruptly if such a character is encountered.
@@ -214,14 +252,7 @@ Similarly, "=CONVERSION_TABLE" followed by "=END_TABLE". After start tag line an
 4. ft <-> cm : using 2 levels
 5. ft <-> m : using 3 levels
 6. in <-> m : using 2 levels
-(* we are not getting remote servers in the above categories. :-( )
-4. b <-> g : using remote server by XXXX
-5. b <-> in : using remote server by XXXX
-6. g <-> cm : g <-> b, b <-> in, in <-> cm
-7. g <-> m : g <-> b, b <-> in, in <-> cm, cm <-> m
-8. g <-> ft : g <-> b, b <-> in, in <-> ft
-(* one set of remote servers)
-
+& more. For complete list, go through convdata.conf file in proxy_server directory.
 
 #### Response to clients
 
@@ -232,6 +263,8 @@ And if the conversion failed for some reason, as there is no defined standard, e
 * one can return a string message with error like, "Not a number\n", "Invalid Input\n", "Incorrect conversion\n", etc.
 
 Things could get messier if Proxy server just forwards the response from one Conversion server to next server. The failure at one server just continues through all conversion levels.
+
+**All the servers developed by us, if they fail to convert, they close the socket without sending a response.**
 
 #### Limitations
 * Conversion servers or the Proxy server are not tested fully, so there are issues.
@@ -244,3 +277,18 @@ Things could get messier if Proxy server just forwards the response from one Con
 2. **Heterogeneity**: It doesn't care which language or which operating system or what area your other server belongs to. Idea is, as long as we follow a Protocol of messages, we are fine.
 3. *Security, Failure handling, Concurency*: Lol.  I guess if you're satisfied, we've done a good job with QoS. :P
 4. *Transparency*: Well, as long as the servers are up and running, you can access it from anywhere. But once you're connected and you've same IP and port number and are not in a isolated network, I think it should work.
+
+#### TRACE
+The best trace that we got connecting to remote servers so far is something like this:
+```
+Request: 1000 cm = ? g
+Step 1/3 using localhost:9998 => 1000 cm = 393.7008 in
+Step 2/3 using 54.152.180.217:5554 => 393.7008 in = 65.6168 b
+Step 3/3 using 54.152.180.217:5555 => 65.6168 b = 30.971129599999998 g
+Response: 1000 cm = 30.9711295999999998 g
+```
+
+This trace was generated using two remote servers at Step 2 and 3 by Yi Zhou (and team) and one local server developed by us. 
+Unfortunately this is the best we could do with the number of servers being online at that momemt. 
+
+**Tried with other servers that were posted on Piazza but we couldn't connect to them, probably because they were taken down at the time we tried.**
