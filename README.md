@@ -9,7 +9,10 @@
 ###Conversion System:
 	1. Feet <-> Inches - C program
 	2. Inches <-> Centimetres - Java program
-	3. Centimetres <-> Meters - Python program
+	3. More Servers!!
+		1. Centimetres <-> Meters - Python program
+		2. Bananas <-> Inches - Python program
+		3. Bananas <-> Pounds of Bananas - C program
 
 	4. Proxy Server (Configurable)
 
@@ -42,7 +45,7 @@ ft in 100
 Response: Response from the server will be a float value.
 ```
 (for above example)
-1200.00
+1200.000000
 ```
 
 #### Inches <-> Centimetres (conv_server_2)
@@ -129,19 +132,53 @@ Response: Response from the server will be a float value.
 ```
 *(using conversion value: 1 Banana = 5.0 Inches)*
 
+**Bananas <-> Pounds of Bananas** (conv_server_5)
+
+This is a C Program. 
+To compile,
+```
+$gcc -o conv_server conv_server.c
+```
+To run, use the following syntax:
+```
+$./conv_server <portno>
+```
+where "conv_server" is the executable name and <portno> is the port number for this server to listen to.
+```
+Ex:
+$./conv_server 9995
+```
+To convert between Bananas and Pounds of Bananas, use the following input format: (same as described by Professor)
+```
+b lbs <value><\n>
+or
+lbs b <value><\n>
+
+Ex:
+lbs b 100
+```
+Response: Response from the server will be a float value. 
+```
+(for above example)
+300.000000
+```
+*(using conversion value: 1 Banana = 3.0 pounds)*
+
+
 ## Proxy Server
 
 Proxy server is a Java based server and at this point supports conversions individually and multi-level conversions using a conversion table which is configurable at Compile-time (if you've the source code) or at Run-time (using a config file).
+
+To compile: 
+```
+$javac ProxyServer.java
+```
 
 #### Starting Proxy server
 There are 2 ways to start our proxy server
 
 **1**. using static conversion data: Conversion server list and conversion table is set within the initConversionsStatic() method and it can be extended before compilation. See the next section (How to configure) for more details.
 
-To compile: 
-```
-$javac ProxyServer.java
-```
 To run:
 ```
 $java ProxyServer <portno>
@@ -153,10 +190,6 @@ $java ProxyServer 7777
 ```
 **2**. using file conversion data: Conversion server list and conversion table can be fed to the Proxy server through a file. This is parsed from initConversionsFile() method. See the next section (How to configure) for details.
 
-To compile:
-```
-$javac ProxyServer.java
-```
 To run:
 ```
 $java ProxyServer <portno> [config file]
@@ -244,15 +277,40 @@ Similarly, "=CONVERSION_TABLE" followed by "=END_TABLE". After start tag line an
 * You'll need to add conversions in both the directions and in the order of conversions to take place.
 * Please do not add multiple servers to do the same conversion, behavior is not tested and it is definitely not supported to connect to the second or later servers if first connection fails.  (Failure handling - BIG NO)
 
-#### Conversions (Currently configured *using local and remote servers)
+#### Conversions (Currently configured using own servers)
 
-1. ft <-> in : using local server
-2. ft <-> cm : using local server
-3. cm <-> m : using local server
-4. ft <-> cm : using 2 levels
-5. ft <-> m : using 3 levels
-6. in <-> m : using 2 levels
-& more. For complete list, go through convdata.conf file in proxy_server directory.
+* following is the conversion table supported by default by our Proxy server (run statically or with provided config file (convdata.conf))
+```
+in<->ft: 1 level using conv_server_1 at port 9999
+cm<->in: 1 level using conv_server_2 at port 9998
+m<->cm: 1 level using conv_server 3 at port 9997
+b<->in: 1 level using conv_server_4 at port 9996
+b<->lbs: 1 level using conv_server_5 at port 9995
+```
+Following multi-level conversions supported using above mentioned conversion servers. 
+```
+ft->cm:ft->in,in->cm
+cm->ft:cm->in,in->ft
+m->in:m->cm,cm->in
+in->m:in->cm,cm->m
+b->cm:b->in,in->cm
+cm->b:cm->in,in->b
+b->ft:b->in,in->ft
+ft->b:ft->in,in->b
+lbs->in:lbs->b,b->in
+in->lbs:in->b,b->lbs
+ft->m:ft->in,in->cm,cm->m
+m->ft:m->cm,cm->in,in->ft
+b->m:b->in,in->cm,cm->m
+m->b:m->cm,cm->in,in->b
+lbs->ft:lbs->b,b->in,in->ft
+ft->lbs:ft->in,in->b,b->lbs
+lbs->cm:lbs->b,b->in,in->cm
+cm->lbs:cm->in,in->b,b->lbs
+lbs->m:lbs->b,b->in,in->cm,cm->m
+m->lbs:m->cm,cm->in,in->b,b->lbs
+```
+**For these conversions to work, the required conversion server has to be up and listening to the ports mentioned in the above list or in the config data.**
 
 #### Response to clients
 
@@ -273,22 +331,9 @@ Things could get messier if Proxy server just forwards the response from one Con
    Especially the Exceptions related to Connections/Parsing conversion data from file etc are not handled.
 
 #### Distributed System Characteristics
-1. **Openness**: All you need to do is build a Conversion table and it works for you. Only problem is, it fetches only at startup!
-2. **Heterogeneity**: It doesn't care which language or which operating system or what area your other server belongs to. Idea is, as long as we follow a Protocol of messages, we are fine.
-3. *Security, Failure handling, Concurency*: Lol.  I guess if you're satisfied, we've done a good job with QoS. :P
-4. *Transparency*: Well, as long as the servers are up and running, you can access it from anywhere. But once you're connected and you've same IP and port number and are not in a isolated network, I think it should work.
+1. **Openness**: All you need to do is build a Conversion table and it works for you. 
+2. **Scalability**: Only problem is, it fetches only at startup!
+3. **Heterogeneity**: It doesn't care which language or which operating system or what area your other server belongs to. Idea is, as long as we follow a Protocol of messages, we are fine.
+4. *Security, Failure handling, Concurency*: Not considered.  *Qos*: I guess if you're satisfied, we've done a good job with QoS. :P
+5. *Transparency*: Well, as long as the servers are up and running, you can access it from anywhere. But once you're connected and you've same IP and port number and are not in a isolated network, I think it should work.
 
-#### TRACE
-The best trace that we got connecting to remote servers so far is something like this:
-```
-Request: 1000 cm = ? g
-Step 1/3 using localhost:9998 => 1000 cm = 393.7008 in
-Step 2/3 using 54.152.180.217:5554 => 393.7008 in = 65.6168 b
-Step 3/3 using 54.152.180.217:5555 => 65.6168 b = 30.971129599999998 g
-Response: 1000 cm = 30.9711295999999998 g
-```
-
-This trace was generated using two remote servers at Step 2 and 3 by Yi Zhou (and team) and one local server developed by us. 
-Unfortunately this is the best we could do with the number of servers being online at that momemt. 
-
-**Tried with other servers that were posted on Piazza but we couldn't connect to them, probably because they were taken down at the time we tried.**

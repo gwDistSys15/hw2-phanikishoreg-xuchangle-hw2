@@ -201,19 +201,37 @@ public class ProxyServer {
 		convServers.put("ft->in", new Server("localhost", 9999));
 		convServers.put("in->cm", new Server("localhost", 9998));
 		convServers.put("cm->in", new Server("localhost", 9998));
-		convServers.put("cm->m", null); // not supported yet
-		convServers.put("m->cm", null); // not supported yet
+		convServers.put("m->cm", new Server("localhost", 9997));
+		convServers.put("cm->m", new Server("localhost", 9997));
+		convServers.put("b->in", new Server("localhost", 9996));
+		convServers.put("in->b", new Server("localhost", 9996));
+		convServers.put("b->lbs", new Server("localhost", 9995));
+		convServers.put("lbs->b", new Server("localhost", 9995));
 
 		// Keeping directed routing makes it lot easier..!!
 		// Support one level conversions using conversion server list.
-		convTable.put("ft->in", "ft->in"); 
+		convTable.put("ft->in", "ft->in");
 		convTable.put("in->ft", "in->ft");
 		convTable.put("in->cm", "in->cm");
 		convTable.put("cm->in", "cm->in");
+		convTable.put("m->cm", "m->cm");
+		convTable.put("cm->m", "cm->m");
+		convTable.put("b->in", "b->in");
+		convTable.put("in->b", "in->b");
+		convTable.put("b->lbs", "b->lbs");
+		convTable.put("lbs->b", "lbs->b");
 
 		// Support two level conversions using conversion server list.
-		convTable.put("ft->cm", "ft->in,in->cm"); 
+		convTable.put("ft->cm", "ft->in,in->cm");
 		convTable.put("cm->ft", "cm->in,in->ft");
+		convTable.put("m->in", "m->cm,cm->in");
+		convTable.put("in->m", "in->cm,cm->m");
+		convTable.put("b->cm", "b->in,in->cm");
+		convTable.put("cm->b", "cm->in,in->b");
+		convTable.put("b->ft", "b->in,in->ft");
+		convTable.put("ft->b", "ft->in,in->b");
+		convTable.put("lbs->in", "lbs->b,b->in");
+		convTable.put("in->lbs", "in->b,b->lbs");
 
 		// Support three or more level conversions using conversion server list.
 		// TBD: Enhance using conversion table with lower level conversions..
@@ -221,6 +239,16 @@ public class ProxyServer {
 		// 		and cm->m 1 level conversion from same conversion table convTable.
 		convTable.put("ft->m", "ft->in,in->cm,cm->m");
 		convTable.put("m->ft", "m->cm,cm->in,in->ft");
+		convTable.put("b->m", "b->in,in->cm,cm->m");
+		convTable.put("m->b", "m->cm,cm->in,in->b");
+		convTable.put("lbs->ft", "lbs->b,b->in,in->ft");
+		convTable.put("ft->lbs", "ft->in,in->b,b->lbs");
+		convTable.put("lbs->cm", "lbs->b,b->in,in->cm");
+		convTable.put("cm->lbs", "cm->in,in->b,b->lbs");
+
+		// 4 levels..
+		convTable.put("lbs->m", "lbs->b,b->in,in->cm,cm->m");
+		convTable.put("m->lbs", "m->cm,cm->in,in->b,b->lbs");
 
 		System.out.println(convServers);
 		System.out.println(convTable);
